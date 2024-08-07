@@ -1,8 +1,9 @@
 SR = 48000
 N_FFT = 512
-HOP = 256
-NUM_SAMPLES = 4800
-NEY_DIR = "dataset/ney/"
-GTR_DIR = "dataset/ac_gtr/"
-NEY_SPECTROGRAM_DIR = "dataset/spectrograms/ney/"
-GTR_SPECTROGRAM_DIR = "dataset/spectrograms/ac_gtr/"
+HOP = 128
+WINDOW_SAMPLE_LEN = 4800 * 2
+FADE_SAMPLE_LEN = 100
+NEY_WAV_DIR = "dataset/ney/"
+GTR_WAV_DIR = "dataset/ac_gtr/"
+NEY_FEATURE_DIR = "dataset/features/ney/"
+GTR_FEATURE_DIR = "dataset/features/ac_gtr/"
