@@ -1,5 +1,4 @@
 import pickle
-import librosa
 import numpy as np
 from constants import *
 from pathlib import Path
@@ -20,9 +19,10 @@ x_train_dirs, x_test_dirs, y_train_dirs, y_test_dirs = train_test_split(
 
 
 class FeatureDataset(Dataset):
-    def __init__(self, x_dirs, y_dirs):
+    def __init__(self, x_dirs, y_dirs, part="real"):
         self.x_dirs = x_dirs
         self.y_dirs = y_dirs
+        self.part = part
         self.x = None
         self.y = None
         self.file_paths_x = None
@@ -59,11 +59,13 @@ class FeatureDataset(Dataset):
         for f in sorted_files:
             with open(f, "rb") as handle:
                 chunk = pickle.load(handle)
-                signal = (chunk["signal"] + 1.0) / 2.0
-                if len(signal) < WINDOW_SAMPLE_LEN:
-                    signal = librosa.util.fix_length(
-                        signal, size=WINDOW_SAMPLE_LEN)
-                features.append(signal)
+                if self.part == "real":
+                    # extract real part and normalize
+                    stft_data = (chunk["stft-data"][0] + 200.0) / 400.0
+                else:
+                    # extract imaginary part and normalize
+                    stft_data = (chunk["stft-data"][1] + 200.0) / 400.0
+                features.append(stft_data)
                 file_paths.append(str(f))
         return features, file_paths
 
@@ -74,15 +76,15 @@ class FeatureDataset(Dataset):
         return self.x.shape[0]
 
 
-train_dataset = FeatureDataset(x_train_dirs, y_train_dirs)
+train_dataset = FeatureDataset(x_train_dirs, y_train_dirs, part="real")
 test_dataset = FeatureDataset(x_test_dirs, y_test_dirs)
 
-train_data_loader = DataLoader(
+stft_train_data_loader = DataLoader(
     dataset=train_dataset,
-    batch_size=8,
+    batch_size=4,
     shuffle=True)
 
-test_data_loader = DataLoader(
+stft_test_data_loader = DataLoader(
     dataset=test_dataset,
-    batch_size=8,
+    batch_size=4,
     shuffle=False)
