@@ -62,9 +62,12 @@ class FeatureDataset(Dataset):
                 if self.part == "real":
                     # extract real part and normalize
                     stft_data = (chunk["stft-data"][0] + 200.0) / 400.0
-                else:
+                elif self.part == "imag":
                     # extract imaginary part and normalize
                     stft_data = (chunk["stft-data"][1] + 200.0) / 400.0
+                else:
+                    raise Exception(
+                        "part parameter must be either `real` or `imag`")
                 features.append(stft_data)
                 file_paths.append(str(f))
         return features, file_paths
@@ -76,15 +79,18 @@ class FeatureDataset(Dataset):
         return self.x.shape[0]
 
 
-train_dataset = FeatureDataset(x_train_dirs, y_train_dirs, part="real")
-test_dataset = FeatureDataset(x_test_dirs, y_test_dirs)
+def build_data_loaders(part="real"):
+    train_dataset = FeatureDataset(x_train_dirs, y_train_dirs, part=part)
+    test_dataset = FeatureDataset(x_test_dirs, y_test_dirs)
 
-stft_train_data_loader = DataLoader(
-    dataset=train_dataset,
-    batch_size=4,
-    shuffle=True)
+    train_data_loader = DataLoader(
+        dataset=train_dataset,
+        batch_size=4,
+        shuffle=True)
 
-stft_test_data_loader = DataLoader(
-    dataset=test_dataset,
-    batch_size=4,
-    shuffle=False)
+    test_data_loader = DataLoader(
+        dataset=test_dataset,
+        batch_size=4,
+        shuffle=False)
+
+    return train_data_loader, test_data_loader
