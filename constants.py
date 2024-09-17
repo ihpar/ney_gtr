@@ -1,8 +1,8 @@
 SR = 48000
-N_FFT = 1024
-HOP = 64
-WINDOW_SAMPLE_LEN = 4800 * 2
-FADE_SAMPLE_LEN = 100
+N_FFT = 256
+HOP = 128
+WINDOW_SAMPLE_LEN = 2 ** 15
+FADE_SAMPLE_LEN = 128
 NEY_WAV_DIR = "dataset/ney/"
 GTR_WAV_DIR = "dataset/ac_gtr/"
 NEY_FEATURE_DIR = "dataset/features/ney/"
