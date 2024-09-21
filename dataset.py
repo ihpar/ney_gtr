@@ -6,14 +6,6 @@ from pathlib import Path
 from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 
-ney_feature_dirs = sorted(
-    [f for f in Path(NEY_FEATURE_DIR).iterdir() if f.is_dir()])
-gtr_feature_dirs = sorted(
-    [f for f in Path(GTR_FEATURE_DIR).iterdir() if f.is_dir()])
-
-x_train_dirs, x_test_dirs, y_train_dirs, y_test_dirs = train_test_split(
-    gtr_feature_dirs, ney_feature_dirs, test_size=0.2, random_state=42)
-
 
 class FeatureDataset(Dataset):
     def __init__(self, x_dirs, y_dirs, part):
@@ -90,6 +82,14 @@ class FeatureDataset(Dataset):
 
 
 def build_data_loaders(part):
+    ney_feature_dirs = sorted(
+        [f for f in Path(NEY_FEATURE_DIR).iterdir() if f.is_dir()])
+    gtr_feature_dirs = sorted(
+        [f for f in Path(GTR_FEATURE_DIR).iterdir() if f.is_dir()])
+
+    x_train_dirs, x_test_dirs, y_train_dirs, y_test_dirs = train_test_split(
+        gtr_feature_dirs, ney_feature_dirs, test_size=0.2, random_state=42)
+
     train_dataset = FeatureDataset(x_train_dirs, y_train_dirs, part)
     test_dataset = FeatureDataset(x_test_dirs, y_test_dirs, part)
 
