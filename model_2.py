@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-class Model_1(nn.Module):
+class Model_2(nn.Module):
     def __init__(self):
         super().__init__()
 
@@ -10,12 +10,10 @@ class Model_1(nn.Module):
             nn.Conv2d(1, 2, 3, stride=2),
             nn.ReLU(),
             nn.Conv2d(2, 4, 3, stride=2),
-            nn.BatchNorm2d(4),
             nn.ReLU(),
             nn.Conv2d(4, 8, 3, stride=2),
             nn.ReLU(),
             nn.Conv2d(8, 16, 3, stride=2),
-            nn.BatchNorm2d(16),
             nn.ReLU()
         )
 
@@ -30,12 +28,10 @@ class Model_1(nn.Module):
             nn.ConvTranspose2d(1, 32, 3, stride=1),
             nn.ReLU(),
             nn.ConvTranspose2d(32, 16, 3, stride=1),
-            nn.BatchNorm2d(16),
             nn.ReLU(),
             nn.ConvTranspose2d(16, 4, 3, stride=1),
             nn.ReLU(),
             nn.ConvTranspose2d(4, 1, 3, stride=1),
-            nn.BatchNorm2d(1),
             nn.Sigmoid()
         )
 
@@ -56,14 +52,10 @@ def test_sizes(x):
     print("E1", x.size())
     x = nn.Conv2d(2, 4, 3, stride=2)(x)
     print("E2", x.size())
-    x = nn.BatchNorm2d(4)(x)
-    print("E3", x.size())
     x = nn.Conv2d(4, 8, 3, stride=2)(x)
     print("E4", x.size())
     x = nn.Conv2d(8, 16, 3, stride=2)(x)
     print("E5", x.size())
-    x = nn.BatchNorm2d(16)(x)
-    print("E6", x.size())
     print()
 
     # bottle
