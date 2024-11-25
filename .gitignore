@@ -1,0 +1,15 @@
+.DS_STORE
+__pycache__/
+*.py[cod]
+*$py.class
+*/__pycache__/
+z_target.wav
+z_prediction.wav
+.lighning_studio/*
+__pycache__/*
+.idea/*
+.lightning_studio/*
+.vscode/*
+models/__pycache__/*
+dataset/features/ac_gtr/
+dataset/features/ney/
