@@ -1,10 +1,10 @@
+NEY_WAV_DIR = "dataset/ney/"
+GTR_WAV_DIR = "dataset/gtr/"
+NEY_FEATURE_DIR = "dataset/features/ney/"
+GTR_FEATURE_DIR = "dataset/features/gtr/"
+
 SR = 48000
 N_FFT = 512
 HOP = 64
 WINDOW_SAMPLE_LEN = 2 ** 14 - HOP
-WINDOW_SLIDE_MARGIN = WINDOW_SAMPLE_LEN - 2 ** 12
-FADE_SAMPLE_LEN = 128
-NEY_WAV_DIR = "dataset/ney/"
-GTR_WAV_DIR = "dataset/ac_gtr/"
-NEY_FEATURE_DIR = "dataset/features/ney/"
-GTR_FEATURE_DIR = "dataset/features/ac_gtr/"
+SIGNAL_HOP = 2 ** 10
