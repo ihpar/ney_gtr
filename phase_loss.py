@@ -10,7 +10,7 @@ def phase_loss(predicted_phase, target_phase):
     # Compute phase difference and wrap it to the range [-pi, pi]
     phase_diff = predicted_phase - target_phase
     phase_diff = torch.atan2(torch.sin(phase_diff),
-                             torch.cos(phase_diff))  # Wrap to [-pi, pi]
+                             torch.cos(phase_diff))
 
     # Compute the loss (mean squared error on the wrapped phase difference)
     loss = torch.mean(phase_diff ** 2)

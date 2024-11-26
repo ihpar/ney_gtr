@@ -39,9 +39,9 @@ class Preprocessor:
             # extract features
             magnitude = np.abs(stft)
             phase = np.angle(stft)
+            db = librosa.power_to_db(magnitude)
             # restore stft as
             # stft = magnitude * (np.cos(phase) + 1j*np.sin(phase))
-            db = np.real(stft)
             result["chunks"].append({
                 "start": start,
                 "end": end,
