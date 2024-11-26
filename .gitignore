@@ -11,5 +11,5 @@ __pycache__/*
 .lightning_studio/*
 .vscode/*
 models/__pycache__/*
-dataset/features/ac_gtr/
+dataset/features/gtr/
 dataset/features/ney/
