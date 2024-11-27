@@ -44,9 +44,13 @@ class Model_2(nn.Module):
 
         # Decoding path
         dec4 = self.decoder4(torch.cat([self.up4(bottleneck), enc4], dim=1))
+        # dec4 = self.bn4(dec4)
         dec3 = self.decoder3(torch.cat([self.up3(dec4), enc3], dim=1))
+        # dec3 = self.bn3(dec3)
         dec2 = self.decoder2(torch.cat([self.up2(dec3), enc2], dim=1))
+        # dec2 = self.bn2(dec2)
         dec1 = self.decoder1(torch.cat([self.up1(dec2), enc1], dim=1))
+        # dec1 = self.bn1(dec1)
 
         # Final output
         return self.sig(self.final_conv(dec1))
@@ -54,10 +58,11 @@ class Model_2(nn.Module):
     def _block(self, in_channels, out_channels):
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
             nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
             nn.BatchNorm2d(out_channels),
-            nn.Sigmoid(),
+            nn.ReLU(inplace=True),
         )
 
     def _upsample(self, in_channels, out_channels):
