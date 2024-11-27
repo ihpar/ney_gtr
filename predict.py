@@ -11,7 +11,8 @@ def predict_polar(model: torch.nn.Module,
                   data_loader,
                   mini,
                   maxi,
-                  limit=10
+                  limit=10,
+                  to_power=False
                   ):
 
     model.eval()
@@ -31,6 +32,9 @@ def predict_polar(model: torch.nn.Module,
 
         pred = pred * (maxi - mini) + mini
         target = y * (maxi - mini) + mini
+        if to_power:
+            pred = librosa.db_to_power(pred)
+            target = librosa.db_to_power(target)
 
         if predictions is None:
             predictions = np.copy(pred)
