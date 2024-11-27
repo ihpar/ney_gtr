@@ -15,8 +15,6 @@ def stitch_wave_chunks(waves):
         if i > 0:
             # fade in wave chunks after the 1st one
             wave[:fade_len] *= fade_in
-        # fade out all wave chunks
-        wave[-fade_len:] *= fade_out
 
         if len(stitched_wave) > 0:
             stitched_wave[-fade_len:] += wave[:fade_len]
@@ -25,5 +23,8 @@ def stitch_wave_chunks(waves):
         else:
             stitched_wave = np.append(stitched_wave, wave)
 
-    stitched_wave /= (np.max(np.abs(stitched_wave)) + 0.001)
+        # fade out all wave chunks
+        stitched_wave[-fade_len:] *= fade_out
+
+    stitched_wave /= (np.max(np.abs(stitched_wave)) + 0.02)
     return stitched_wave
