@@ -25,4 +25,5 @@ def stitch_wave_chunks(waves):
         else:
             stitched_wave = np.append(stitched_wave, wave)
 
+    stitched_wave /= (np.max(np.abs(stitched_wave)) + 0.001)
     return stitched_wave
