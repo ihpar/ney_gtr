@@ -7,12 +7,11 @@ from sklearn.model_selection import train_test_split
 
 
 class FeatureDataset(Dataset):
-    def __init__(self, x_dirs, y_dirs, min_max, part, log_scale):
+    def __init__(self, x_dirs, y_dirs, min_max, part):
         self.x_dirs = x_dirs
         self.y_dirs = y_dirs
         self.min_max = min_max
         self.part = part
-        self.log_scale = log_scale
 
         # gtr files
         self.x, self.file_paths_x = self._build_feature_data(
@@ -58,8 +57,6 @@ class FeatureDataset(Dataset):
             min_mag = min_max["min"]["magnitude"]
             max_mag = min_max["max"]["magnitude"]
             mags = (mags - min_mag) / (max_mag - min_mag)
-            if self.log_scale:
-                mags = np.log1p(mags)
 
             phases = chunk["phase"]
             min_phase = min_max["min"]["phase"]
@@ -70,8 +67,6 @@ class FeatureDataset(Dataset):
             min_db = min_max["min"]["db"]
             max_db = min_max["max"]["db"]
             dbs = (dbs - min_db) / (max_db - min_db)
-            if self.log_scale:
-                dbs = np.log1p(dbs)
 
             if part == "magnitude":
                 features.append(np.expand_dims(mags, axis=0))
@@ -93,7 +88,7 @@ class FeatureDataset(Dataset):
         return self.x.shape[0]
 
 
-def build_data_loaders(min_max, part=None, log_scale=False, test_size=0.2):
+def build_data_loaders(min_max, part=None, test_size=0.2):
     gtr_feature_dirs = sorted(
         [f for f in Path(GTR_FEATURE_DIR).iterdir() if f.is_dir()])
     ney_feature_dirs = sorted(
@@ -106,9 +101,9 @@ def build_data_loaders(min_max, part=None, log_scale=False, test_size=0.2):
         random_state=42)
 
     train_dataset = FeatureDataset(x_train_dirs, y_train_dirs,
-                                   min_max, part, log_scale)
+                                   min_max, part)
     test_dataset = FeatureDataset(x_test_dirs, y_test_dirs,
-                                  min_max, part, log_scale)
+                                  min_max, part)
 
     train_data_loader = DataLoader(dataset=train_dataset,
                                    batch_size=4,
@@ -126,9 +121,8 @@ if __name__ == "__main__":
         min_max = pickle.load(handle)
 
     _, test_loader = build_data_loaders(min_max,
-                                        part="db",
-                                        log_scale=False,
-                                        test_size=0.15)
+                                        part="magnitude",
+                                        test_size=0.1)
 
     x, y, _, _ = next(iter(test_loader))
     print(x.size())
