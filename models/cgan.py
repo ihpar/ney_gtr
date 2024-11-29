@@ -72,7 +72,7 @@ class UNetGenerator(nn.Module):
 
             x = torch.cat([x, encodings[i]], dim=1)
 
-        return torch.tanh(self.final_layer(x))
+        return torch.sigmoid(self.final_layer(x))
 
 
 class PatchGANDiscriminator(nn.Module):
