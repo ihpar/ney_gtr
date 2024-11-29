@@ -70,7 +70,7 @@ def train_model(model: nn.Module,
 if __name__ == "__main__":
     import pickle
     import torch.optim as optim
-    from models.model_18 import Model_18
+    from models.model_0 import Model_0
     from early_stopper import EarlyStopper
     from magnitude_loss import MagnitudeLoss
     from polar_dataset import build_data_loaders
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         min_max = pickle.load(handle)
 
     device = torch.device("cpu")
-    model = Model_18()
+    model = Model_0()
     train_data_loader, test_data_loader = build_data_loaders(
         min_max, part="magnitude", test_size=0.1)
 

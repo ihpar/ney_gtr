@@ -10,13 +10,13 @@ class ConvBlock(nn.Module):
         self.conv = nn.Conv2d(in_channels, out_channels,
                               kernel_size, stride, padding)
         self.bn = nn.BatchNorm2d(out_channels)
-        self.sig = nn.Sigmoid()
+        self.act = nn.LeakyReLU(0.2)
 
     def forward(self, x):
-        return self.sig(self.bn(self.conv(x)))
+        return self.act(self.bn(self.conv(x)))
 
 
-class Model_18(nn.Module):
+class Model_0(nn.Module):
     def __init__(self, in_channels=1, num_features=64):
         super().__init__()
 
@@ -48,7 +48,7 @@ class Model_18(nn.Module):
 
         # Final convolution
         self.final = nn.Conv2d(num_features, 1, kernel_size=1)
-        self.sig = nn.Sigmoid()
+        self.tanh = nn.Tanh()
 
     def forward(self, x):
         # Encoder path
@@ -67,11 +67,11 @@ class Model_18(nn.Module):
         dec1 = self.dec1(torch.cat([self.up1(dec2), enc1], dim=1))
 
         # Final output
-        return self.sig(self.final(dec1))
+        return self.tanh(self.final(dec1))
 
 
 if __name__ == "__main__":
-    model = Model_18(in_channels=1, num_features=32)
+    model = Model_0(in_channels=1, num_features=32)
     x = torch.randn(4, 1, 256, 256)
     output = model(x)
 

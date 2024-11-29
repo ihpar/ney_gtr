@@ -7,10 +7,11 @@ import torch.nn as nn
 
 class UNetGenerator(nn.Module):
     def __init__(self, in_channels=1, out_channels=1, features=64):
-        super(UNetGenerator, self).__init__()
+        super().__init__()
+
         self.encoder = nn.ModuleList([
-            self._block(in_channels, features, kernel_size=4,
-                        stride=2, padding=1),
+            self._block(in_channels, features,
+                        kernel_size=4, stride=2, padding=1),
             self._block(features, features * 2, 4, 2, 1),
             self._block(features * 2, features * 4, 4, 2, 1),
             self._block(features * 4, features * 8, 4, 2,  1),
@@ -18,14 +19,10 @@ class UNetGenerator(nn.Module):
         ])
 
         self.decoder = nn.ModuleList([
-            self._upblock(features * 8, features * 8, 4, 2,
-                          1),                    # [4 -> 8]
-            self._upblock(features * 8 * 2, features * 4, 4,
-                          2, 1),                # [8 -> 16]
-            self._upblock(features * 4 * 2, features * 2, 4,
-                          2, 1),                # [16 -> 32]
-            self._upblock(features * 2 * 2, features, 4, 2,
-                          1),                    # [32 -> 64]
+            self._upblock(features * 8, features * 8, 4, 2, 1),
+            self._upblock(features * 8 * 2, features * 4, 4, 2, 1),
+            self._upblock(features * 4 * 2, features * 2, 4, 2, 1),
+            self._upblock(features * 2 * 2, features, 4, 2, 1),
         ])
 
         self.final_layer = nn.ConvTranspose2d(
@@ -44,27 +41,24 @@ class UNetGenerator(nn.Module):
             nn.ConvTranspose2d(in_channels, out_channels,
                                kernel_size, stride, padding, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU()
+            nn.LeakyReLU(0.2)
         )
 
     def forward(self, x):
         encodings = []
-
-        # Encoding (downsampling)
         for layer in self.encoder:
             x = layer(x)
             encodings.append(x)
 
-        # Decoding (upsampling)
-        # Exclude last encoding and reverse for skip connections
         encodings = encodings[:-1][::-1]
         for i, layer in enumerate(self.decoder):
             x = layer(x)
 
-            # Match size for concatenation
             if x.size(2) != encodings[i].size(2) or x.size(3) != encodings[i].size(3):
                 encodings[i] = torch.nn.functional.interpolate(
-                    encodings[i], size=(x.size(2), x.size(3)), mode='nearest')
+                    encodings[i],
+                    size=(x.size(2), x.size(3)),
+                    mode="nearest")
 
             x = torch.cat([x, encodings[i]], dim=1)
 
@@ -73,7 +67,8 @@ class UNetGenerator(nn.Module):
 
 class PatchGANDiscriminator(nn.Module):
     def __init__(self, in_channels=2, features=64):
-        super(PatchGANDiscriminator, self).__init__()
+        super().__init__()
+
         self.model = nn.Sequential(
             self._block(in_channels, features, 4, 2, 1),
             self._block(features, features * 2, 4, 2, 1),
@@ -94,32 +89,7 @@ class PatchGANDiscriminator(nn.Module):
         return torch.sigmoid(self.model(x))
 
 
-# Models
-device = "cuda" if torch.cuda.is_available() else "cpu"
-generator = UNetGenerator(in_channels=1, out_channels=1).to(device)
-discriminator = PatchGANDiscriminator(in_channels=2).to(device)
-
-# Hyperparameters
-batch_size = 4
-epochs = 1
-lr = 2e-4
-lambda_l1 = 100  # Weight for L1 loss
-
-# Loss Functions
-adversarial_loss = nn.BCELoss()  # Binary cross-entropy for adversarial loss
-l1_loss = nn.L1Loss()  # L1 loss for reconstruction
-
-# Optimizers
-optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
-optimizer_D = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))
-
-# Fake and Real Labels
-real_label = 1.0
-fake_label = 0.0
-
 # Training Loop
-
-
 def train(dataloader):
     generator.train()
     discriminator.train()
@@ -182,10 +152,6 @@ def train(dataloader):
     print("Training Complete!")
 
 
-# Example DataLoader (Dummy Data)
-# Replace this with your dataset loader (e.g., torch.utils.data.DataLoader)
-
-
 class DummyDataset(Dataset):
     def __init__(self, size=1000):
         self.data = torch.randn(size, 1, 128, 128)
@@ -199,8 +165,32 @@ class DummyDataset(Dataset):
         return input_image, target_image
 
 
-dataset = DummyDataset()
-dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+if __name__ == "__main__":
+    # Models
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    generator = UNetGenerator(in_channels=1, out_channels=1).to(device)
+    discriminator = PatchGANDiscriminator(in_channels=2).to(device)
 
-# Train the Model
-train(dataloader)
+    # Hyperparameters
+    batch_size = 4
+    epochs = 1
+    lr = 2e-4
+    lambda_l1 = 100  # Weight for L1 loss
+
+    # Loss Functions
+    adversarial_loss = nn.BCELoss()  # Binary cross-entropy for adversarial loss
+    l1_loss = nn.L1Loss()  # L1 loss for reconstruction
+
+    # Optimizers
+    optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
+    optimizer_D = optim.Adam(discriminator.parameters(),
+                             lr=lr, betas=(0.5, 0.999))
+
+    # Fake and Real Labels
+    real_label = 1.0
+    fake_label = 0.0
+    dataset = DummyDataset()
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+    # Train the Model
+    train(dataloader)

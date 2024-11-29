@@ -96,7 +96,7 @@ def make_wav(magnitudes, phases):
 
 if __name__ == "__main__":
     import pickle
-    from models.model_18 import Model_18
+    from models.model_0 import Model_0
     from polar_dataset import build_data_loaders
     part = "magnitude"
     with open("dataset/features/min_max.pkl", "rb") as handle:
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     _, test_data_loader = build_data_loaders(
         min_max, part=part, test_size=0.1)
 
-    model = Model_18()
+    model = Model_0()
     predictions, targets = predict_polar(model,
                                          test_data_loader,
                                          min_max["ney"]["min"][part],
