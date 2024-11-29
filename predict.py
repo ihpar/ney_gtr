@@ -12,7 +12,7 @@ def predict_polar(model: torch.nn.Module,
                   mini,
                   maxi,
                   limit=10,
-                  to_power=False
+                  from_db=False
                   ):
 
     model.eval()
@@ -30,11 +30,11 @@ def predict_polar(model: torch.nn.Module,
 
         y = y.numpy().squeeze(axis=1)
 
-        pred = pred * (maxi - mini) + mini
-        target = y * (maxi - mini) + mini
-        if to_power:
-            pred = librosa.db_to_power(pred)
-            target = librosa.db_to_power(target)
+        pred = 0.5 * (pred + 1.0) * (maxi - mini) + mini
+        target = 0.5 * (y + 1.0) * (maxi - mini) + mini
+        if from_db:
+            pred = librosa.db_to_amplitude(pred)
+            target = librosa.db_to_amplitude(target)
 
         if predictions is None:
             predictions = np.copy(pred)
@@ -68,7 +68,7 @@ def get_phases(data_loader,
             print(", ".join([p.replace("dataset/features/ney/", "")
                              for p in y_paths]))
 
-        phase = (phase - 0.5) * 2 * np.pi
+        phase = phase * np.pi
         if phases is None:
             phases = np.copy(phase)
         else:
@@ -84,7 +84,7 @@ def get_phases(data_loader,
 def make_wav(chunks_0, chunks_1):
     wave_chunks = []
     for chunk_0, chunk_1 in zip(chunks_0, chunks_1):
-        chunk = chunk_0 * (np.cos(chunk_1) + 1j*np.sin(chunk_1))
+        chunk = chunk_0 * np.exp(1j * chunk_1)
         wave_chunk = librosa.istft(chunk, n_fft=N_FFT, hop_length=HOP)
         wave_chunks.append(wave_chunk)
 
