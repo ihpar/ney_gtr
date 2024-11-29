@@ -10,15 +10,11 @@ class UNetGenerator(nn.Module):
         super(UNetGenerator, self).__init__()
         self.encoder = nn.ModuleList([
             self._block(in_channels, features, kernel_size=4,
-                        stride=2, padding=1),  # [128 -> 64]
-            self._block(features, features * 2, 4, 2,
-                        1),                          # [64 -> 32]
-            self._block(features * 2, features * 4, 4, 2,
-                        1),                      # [32 -> 16]
-            self._block(features * 4, features * 8, 4, 2,
-                        1),                      # [16 -> 8]
-            self._block(features * 8, features * 8, 4, 2,
-                        1),                      # [8 -> 4]
+                        stride=2, padding=1),
+            self._block(features, features * 2, 4, 2, 1),
+            self._block(features * 2, features * 4, 4, 2, 1),
+            self._block(features * 4, features * 8, 4, 2,  1),
+            self._block(features * 8, features * 8, 4, 2, 1),
         ])
 
         self.decoder = nn.ModuleList([
@@ -72,23 +68,18 @@ class UNetGenerator(nn.Module):
 
             x = torch.cat([x, encodings[i]], dim=1)
 
-        return torch.sigmoid(self.final_layer(x))
+        return torch.tanh(self.final_layer(x))
 
 
 class PatchGANDiscriminator(nn.Module):
     def __init__(self, in_channels=2, features=64):
         super(PatchGANDiscriminator, self).__init__()
         self.model = nn.Sequential(
-            self._block(in_channels, features, 4, 2,
-                        1),             # [128 -> 64]
-            self._block(features, features * 2, 4, 2,
-                        1),            # [64 -> 32]
-            self._block(features * 2, features * 4,
-                        4, 2, 1),        # [32 -> 16]
-            self._block(features * 4, features * 8,
-                        4, 1, 1),        # [16 -> 15]
-            nn.Conv2d(features * 8, 1, kernel_size=4,
-                      stride=1, padding=1)  # [15 -> 14]
+            self._block(in_channels, features, 4, 2, 1),
+            self._block(features, features * 2, 4, 2, 1),
+            self._block(features * 2, features * 4, 4, 2, 1),
+            self._block(features * 4, features * 8, 4, 1, 1),
+            nn.Conv2d(features * 8, 1, kernel_size=4, stride=1, padding=1)
         )
 
     def _block(self, in_channels, out_channels, kernel_size, stride, padding):

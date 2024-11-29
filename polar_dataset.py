@@ -45,6 +45,9 @@ class FeatureDataset(Dataset):
         return features_arr, paths_arr
 
     def _get_features_in_dir(self, dir_path, min_max, part):
+        if part not in ["magnitude", "phase", "db"]:
+            raise Exception(f"Invalid part name: {part}")
+
         features = []
         file_paths = []
         sorted_files = sorted(list(Path(dir_path).iterdir()),
@@ -53,30 +56,11 @@ class FeatureDataset(Dataset):
             with open(f, "rb") as handle:
                 chunk = pickle.load(handle)
 
-            mags = chunk["magnitude"]
-            min_mag = min_max["min"]["magnitude"]
-            max_mag = min_max["max"]["magnitude"]
-            mags = (mags - min_mag) / (max_mag - min_mag)
-
-            phases = chunk["phase"]
-            min_phase = min_max["min"]["phase"]
-            max_phase = min_max["max"]["phase"]
-            phases = (phases - min_phase) / (max_phase - min_phase)
-
-            dbs = chunk["db"]
-            min_db = min_max["min"]["db"]
-            max_db = min_max["max"]["db"]
-            dbs = (dbs - min_db) / (max_db - min_db)
-
-            if part == "magnitude":
-                features.append(np.expand_dims(mags, axis=0))
-            elif part == "phase":
-                features.append(np.expand_dims(phases, axis=0))
-            elif part == "db":
-                features.append(np.expand_dims(dbs, axis=0))
-            else:
-                combined = np.array([mags, phases])
-                features.append(combined)
+            data = chunk[part]
+            mini = min_max["min"][part]
+            maxi = min_max["max"][part]
+            data = 2.0 * (data - mini) / (maxi - mini) - 1.0
+            features.append(np.expand_dims(data, axis=0))
 
             file_paths.append(str(f))
         return features, file_paths
@@ -121,7 +105,7 @@ if __name__ == "__main__":
         min_max = pickle.load(handle)
 
     _, test_loader = build_data_loaders(min_max,
-                                        part="magnitude",
+                                        part="db",
                                         test_size=0.1)
 
     x, y, _, _ = next(iter(test_loader))

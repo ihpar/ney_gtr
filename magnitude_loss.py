@@ -9,8 +9,8 @@ class MagnitudeLoss(nn.Module):
         self.maxi = maxi
 
     def forward(self, y_hat, y):
-        y_hat = y_hat * (self.maxi - self.mini) + self.mini
-        y = y * (self.maxi - self.mini) + self.mini
+        y_hat = 0.5 * (y_hat + 1.0) * (self.maxi - self.mini) + self.mini
+        y = 0.5 * (y + 1.0) * (self.maxi - self.mini) + self.mini
         magnitude_diff = y_hat - y
         loss = torch.mean(magnitude_diff ** 2)
 
