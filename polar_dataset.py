@@ -78,24 +78,29 @@ def build_data_loaders(min_max, part=None, test_size=0.2):
     ney_feature_dirs = sorted(
         [f for f in Path(NEY_FEATURE_DIR).iterdir() if f.is_dir()])
 
-    x_train_dirs, x_test_dirs, y_train_dirs, y_test_dirs = train_test_split(
-        gtr_feature_dirs,
-        ney_feature_dirs,
-        test_size=test_size,
-        random_state=42)
+    test_dataset, test_data_loader = None, None
+
+    if test_size > 0:
+        x_train_dirs, x_test_dirs, y_train_dirs, y_test_dirs = train_test_split(
+            gtr_feature_dirs,
+            ney_feature_dirs,
+            test_size=test_size,
+            random_state=42)
+        test_dataset = FeatureDataset(x_test_dirs, y_test_dirs,
+                                      min_max, part)
+        test_data_loader = DataLoader(dataset=test_dataset,
+                                      batch_size=4,
+                                      shuffle=False)
+    else:
+        x_train_dirs = gtr_feature_dirs
+        y_train_dirs = ney_feature_dirs
 
     train_dataset = FeatureDataset(x_train_dirs, y_train_dirs,
                                    min_max, part)
-    test_dataset = FeatureDataset(x_test_dirs, y_test_dirs,
-                                  min_max, part)
 
     train_data_loader = DataLoader(dataset=train_dataset,
                                    batch_size=4,
                                    shuffle=True)
-
-    test_data_loader = DataLoader(dataset=test_dataset,
-                                  batch_size=4,
-                                  shuffle=False)
 
     return train_data_loader, test_data_loader
 
@@ -104,11 +109,11 @@ if __name__ == "__main__":
     with open("dataset/features/min_max.pkl", "rb") as handle:
         min_max = pickle.load(handle)
 
-    _, test_loader = build_data_loaders(min_max,
-                                        part="db",
-                                        test_size=0.1)
+    train_loader, test_loader = build_data_loaders(min_max,
+                                                   part="db",
+                                                   test_size=0.0)
 
-    x, y, _, _ = next(iter(test_loader))
+    x, y, _, _ = next(iter(train_loader))
     print(x.size())
     print(y.size())
 
