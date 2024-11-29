@@ -19,6 +19,8 @@ def predict_polar(model: torch.nn.Module,
     predictions, targets = None, None
 
     i = 0
+    x_paths: list[str]
+    y_paths: list[str]
     for x, y, x_paths, y_paths in data_loader:
         print(", ".join([p.replace("dataset/features/gtr/", "")
               for p in x_paths]))
@@ -68,7 +70,7 @@ def get_phases(data_loader,
             print(", ".join([p.replace("dataset/features/ney/", "")
                              for p in y_paths]))
 
-        phase = phase * np.pi
+        phase = phase * np.pi  # [-1, 1] -> [-pi, pi]
         if phases is None:
             phases = np.copy(phase)
         else:
@@ -81,9 +83,9 @@ def get_phases(data_loader,
     return phases
 
 
-def make_wav(chunks_0, chunks_1):
+def make_wav(magnitudes, phases):
     wave_chunks = []
-    for chunk_0, chunk_1 in zip(chunks_0, chunks_1):
+    for chunk_0, chunk_1 in zip(magnitudes, phases):
         chunk = chunk_0 * np.exp(1j * chunk_1)
         wave_chunk = librosa.istft(chunk, n_fft=N_FFT, hop_length=HOP)
         wave_chunks.append(wave_chunk)
