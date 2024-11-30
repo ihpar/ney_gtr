@@ -62,7 +62,7 @@ class Model_1(nn.Module):
             nn.LeakyReLU(inplace=True),
             nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
             nn.BatchNorm2d(out_channels),
-            nn.Sigmoid(),
+            nn.LeakyReLU(inplace=True),
         )
 
     def _upsample(self, in_channels, out_channels):
