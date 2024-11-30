@@ -24,14 +24,14 @@ class UNetGenerator(nn.Module):
 
         self.final_layer = nn.ConvTranspose2d(
             features * 2, out_channels, kernel_size=4, stride=2, padding=1)
+        self.act = nn.Sigmoid()
 
     def _block(self, in_channels, out_channels, kernel_size, stride, padding):
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size,
                       stride, padding, bias=False),
             nn.BatchNorm2d(out_channels),
-            # nn.LeakyReLU(0.2, inplace=True)
-            nn.Tanh()
+            nn.LeakyReLU(0.2, inplace=True)
         )
 
     def _upblock(self, in_channels, out_channels, kernel_size, stride, padding):
@@ -39,8 +39,7 @@ class UNetGenerator(nn.Module):
             nn.ConvTranspose2d(in_channels, out_channels,
                                kernel_size, stride, padding, bias=False),
             nn.BatchNorm2d(out_channels),
-            # nn.LeakyReLU(0.2, inplace=True)
-            nn.Tanh()
+            nn.LeakyReLU(0.2, inplace=True)
         )
 
     def forward(self, x):
@@ -61,7 +60,7 @@ class UNetGenerator(nn.Module):
 
             x = torch.cat([x, encodings[i]], dim=1)
 
-        return torch.tanh(self.final_layer(x))
+        return self.act(self.final_layer(x))
 
 
 if __name__ == "__main__":

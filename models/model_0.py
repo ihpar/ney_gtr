@@ -10,7 +10,7 @@ class ConvBlock(nn.Module):
         self.conv = nn.Conv2d(in_channels, out_channels,
                               kernel_size, stride, padding)
         self.bn = nn.BatchNorm2d(out_channels)
-        self.act = nn.Tanh()
+        self.act = nn.LeakyReLU(inplace=True)
 
     def forward(self, x):
         return self.act(self.bn(self.conv(x)))
@@ -48,7 +48,7 @@ class Model_0(nn.Module):
 
         # Final convolution
         self.final = nn.Conv2d(num_features, 1, kernel_size=1)
-        self.tanh = nn.Tanh()
+        self.act = nn.Sigmoid()
 
     def forward(self, x):
         # Encoder path
@@ -67,7 +67,7 @@ class Model_0(nn.Module):
         dec1 = self.dec1(torch.cat([self.up1(dec2), enc1], dim=1))
 
         # Final output
-        return self.tanh(self.final(dec1))
+        return self.act(self.final(dec1))
 
 
 if __name__ == "__main__":
