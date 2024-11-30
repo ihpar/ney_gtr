@@ -8,3 +8,6 @@ N_FFT = 512
 HOP = 64
 WINDOW_SAMPLE_LEN = 2 ** 14 - HOP
 SIGNAL_HOP = 2 ** 10
+
+# for test time
+OVERLAP = 2 ** 8

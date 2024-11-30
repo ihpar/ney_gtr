@@ -8,6 +8,7 @@ def train_cgan(device,
                optimizer_D,
                epochs):
 
+    import torch
     real_label = 1.0
     fake_label = 0.0
     lambda_l1 = 100
