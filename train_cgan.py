@@ -6,12 +6,12 @@ def train_cgan(device,
                l1_loss,
                optimizer_G,
                optimizer_D,
-               epochs):
+               epochs,
+               lambda_l1):
 
     import torch
     real_label = 1.0
     fake_label = 0.0
-    lambda_l1 = 100
     generator.train()
     discriminator.train()
 
@@ -61,10 +61,11 @@ def train_cgan(device,
             g_loss.backward()
             optimizer_G.step()
 
-            if batch_idx % 10 == 0:
+            if batch_idx % 50 == 0:
                 print(f"Epoch [{epoch}/{epochs}] Batch {batch_idx}/{len(dataloader)} "
                       f"Loss D: {d_loss.item():.4f}, Loss G: {g_loss.item():.4f}")
 
+        print("-" * 50)
     print("Training Complete!")
 
 
