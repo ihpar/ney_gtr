@@ -7,11 +7,12 @@ from sklearn.model_selection import train_test_split
 
 
 class FeatureDataset(Dataset):
-    def __init__(self, x_dirs, y_dirs, min_max, part):
+    def __init__(self, x_dirs, y_dirs, min_max, part, normalize_to="global"):
         self.x_dirs = x_dirs
         self.y_dirs = y_dirs
         self.min_max = min_max
         self.part = part
+        self.normalize_to = normalize_to
 
         # gtr files
         self.x, self.file_paths_x = self._build_feature_data(
@@ -57,9 +58,10 @@ class FeatureDataset(Dataset):
                 chunk = pickle.load(handle)
 
             data = chunk[part]
-            mini = min_max["min"][part]
-            maxi = min_max["max"][part]
-            data = 2.0 * (data - mini) / (maxi - mini) - 1.0
+            if self.normalize_to == "global":
+                mini = min_max["min"][part]
+                maxi = min_max["max"][part]
+                data = (data - mini) / (maxi - mini)
             features.append(np.expand_dims(data, axis=0))
 
             file_paths.append(str(f))

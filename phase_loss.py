@@ -7,8 +7,8 @@ class PhaseLoss(nn.Module):
         super().__init__()
 
     def forward(self, y_hat, y):
-        y_hat = y_hat * torch.pi
-        y = y * torch.pi
+        y_hat = y_hat * 2.0 * torch.pi - torch.pi
+        y = y * 2.0 * torch.pi - torch.pi
         phase_diff = y_hat - y
         phase_diff = torch.atan2(torch.sin(phase_diff),
                                  torch.cos(phase_diff))

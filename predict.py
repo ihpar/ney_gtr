@@ -32,8 +32,8 @@ def predict_polar(model: torch.nn.Module,
 
         y = y.numpy().squeeze(axis=1)
 
-        pred = 0.5 * (pred + 1.0) * (maxi - mini) + mini
-        target = 0.5 * (y + 1.0) * (maxi - mini) + mini
+        pred = pred * (maxi - mini) + mini
+        target = y * (maxi - mini) + mini
         if from_db:
             pred = librosa.db_to_amplitude(pred)
             target = librosa.db_to_amplitude(target)
@@ -70,7 +70,7 @@ def get_phases(data_loader,
             print(", ".join([p.replace("dataset/features/ney/", "")
                              for p in y_paths]))
 
-        phase = phase * np.pi  # [-1, 1] -> [-pi, pi]
+        phase = phase * 2.0 * np.pi - np.pi  # [0, 1] -> [-pi, pi]
         if phases is None:
             phases = np.copy(phase)
         else:
