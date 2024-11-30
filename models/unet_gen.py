@@ -30,7 +30,8 @@ class UNetGenerator(nn.Module):
             nn.Conv2d(in_channels, out_channels, kernel_size,
                       stride, padding, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.LeakyReLU(0.2, inplace=True)
+            # nn.LeakyReLU(0.2, inplace=True)
+            nn.Tanh()
         )
 
     def _upblock(self, in_channels, out_channels, kernel_size, stride, padding):
@@ -38,7 +39,8 @@ class UNetGenerator(nn.Module):
             nn.ConvTranspose2d(in_channels, out_channels,
                                kernel_size, stride, padding, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.LeakyReLU(0.2, inplace=True)
+            # nn.LeakyReLU(0.2, inplace=True)
+            nn.Tanh()
         )
 
     def forward(self, x):
