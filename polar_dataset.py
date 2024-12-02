@@ -61,7 +61,10 @@ class FeatureDataset(Dataset):
             if self.normalize_to == "global":
                 mini = min_max["min"][part]
                 maxi = min_max["max"][part]
-                data = (data - mini) / (maxi - mini)
+            elif self.normalize_to == "local":
+                mini = np.min(data)
+                maxi = np.max(data)
+            data = (data - mini) / (maxi - mini)
             features.append(np.expand_dims(data, axis=0))
 
             file_paths.append(str(f))
@@ -74,7 +77,7 @@ class FeatureDataset(Dataset):
         return self.x.shape[0]
 
 
-def build_data_loaders(min_max, part=None, test_size=0.2):
+def build_data_loaders(min_max, part=None, test_size=0.2, normalize_to="global"):
     gtr_feature_dirs = sorted(
         [f for f in Path(GTR_FEATURE_DIR).iterdir() if f.is_dir()])
     ney_feature_dirs = sorted(
@@ -89,7 +92,7 @@ def build_data_loaders(min_max, part=None, test_size=0.2):
             test_size=test_size,
             random_state=42)
         test_dataset = FeatureDataset(x_test_dirs, y_test_dirs,
-                                      min_max, part)
+                                      min_max, part, normalize_to=normalize_to)
         test_data_loader = DataLoader(dataset=test_dataset,
                                       batch_size=4,
                                       shuffle=False)
@@ -98,7 +101,7 @@ def build_data_loaders(min_max, part=None, test_size=0.2):
         y_train_dirs = ney_feature_dirs
 
     train_dataset = FeatureDataset(x_train_dirs, y_train_dirs,
-                                   min_max, part)
+                                   min_max, part, normalize_to=normalize_to)
 
     train_data_loader = DataLoader(dataset=train_dataset,
                                    batch_size=4,
@@ -113,7 +116,7 @@ if __name__ == "__main__":
 
     train_loader, test_loader = build_data_loaders(min_max,
                                                    part="db",
-                                                   test_size=0.0)
+                                                   test_size=0.1, normalize_to="local")
 
     x, y, _, _ = next(iter(train_loader))
     print(x.size())
