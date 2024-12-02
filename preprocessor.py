@@ -16,11 +16,21 @@ class Preprocessor:
         self.signal_hop = signal_hop
         self.window_len = window_len
 
-    def preprocess_wav_file(self, file_path):
+    def normalize_signal(self, signal, add_noise=False):
+        if add_noise:
+            signal = np.random.normal(0, 0.1, len(signal)) * 0.1 + signal
+        maxi = np.max(np.abs(signal))
+        ratio = 1.0 / maxi
+        signal = ratio * signal
+        return signal
+
+    def preprocess_wav_file(self, file_path, add_noise=False):
         """
         Takes a wav file path as arg and splits into chunks of WINDOW_SAMPLE_LEN
         """
         signal, _ = librosa.load(file_path, mono=True, sr=self.sr)
+        signal = self.normalize_signal(signal, add_noise)
+
         signal_len = len(signal)
         result = {
             "file_path": file_path,
@@ -113,7 +123,7 @@ class Preprocessor:
 
 if __name__ == "__main__":
     pp = Preprocessor(SR, N_FFT, HOP, SIGNAL_HOP, WINDOW_SAMPLE_LEN)
-    result = pp.preprocess_wav_file("dataset/ney/00_Ney_C_3.wav")
+    result = pp.preprocess_wav_file("dataset/ney/ney_10.wav")
     print(len(result["chunks"]))
     print(result["chunks"][0]["magnitude"].shape)
     print(result["chunks"][0]["phase"].shape)

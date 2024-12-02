@@ -4,9 +4,9 @@ NEY_FEATURE_DIR = "dataset/features/ney/"
 GTR_FEATURE_DIR = "dataset/features/gtr/"
 
 SR = 48000
-N_FFT = 512
+N_FFT = 1022
 HOP = 64
-WINDOW_SAMPLE_LEN = 2 ** 14 - HOP
+WINDOW_SAMPLE_LEN = 2 ** 15 - HOP
 SIGNAL_HOP = 2 ** 10
 
 # for test time
