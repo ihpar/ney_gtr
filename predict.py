@@ -35,8 +35,8 @@ def predict_polar(model: torch.nn.Module,
         pred = pred * (maxi - mini) + mini
         target = y * (maxi - mini) + mini
         if from_db:
-            pred = librosa.db_to_amplitude(pred)
-            target = librosa.db_to_amplitude(target)
+            pred = np.exp(pred) - 0.02
+            target = np.exp(target) - 0.02
 
         if predictions is None:
             predictions = np.copy(pred)
