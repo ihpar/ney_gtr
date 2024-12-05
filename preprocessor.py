@@ -16,20 +16,18 @@ class Preprocessor:
         self.signal_hop = signal_hop
         self.window_len = window_len
 
-    def normalize_signal(self, signal, add_noise=False):
-        if add_noise:
-            signal = np.random.normal(0, 0.1, len(signal)) * 0.1 + signal
+    def normalize_signal(self, signal):
         maxi = np.max(np.abs(signal))
         ratio = 1.0 / maxi
         signal = ratio * signal
         return signal
 
-    def preprocess_wav_file(self, file_path, add_noise=False):
+    def preprocess_wav_file(self, file_path):
         """
         Takes a wav file path as arg and splits into chunks of WINDOW_SAMPLE_LEN
         """
         signal, _ = librosa.load(file_path, mono=True, sr=self.sr)
-        signal = self.normalize_signal(signal, add_noise)
+        signal = self.normalize_signal(signal)
 
         signal_len = len(signal)
         result = {
@@ -45,11 +43,11 @@ class Preprocessor:
 
             window = signal[start: end]
             stft = librosa.stft(window, n_fft=self.n_fft,
-                                hop_length=self.hop)[:-1]
+                                hop_length=self.hop)
             # extract features
             magnitude = np.abs(stft)
             phase = np.angle(stft)
-            db = np.log(magnitude + 0.02)
+            db = librosa.amplitude_to_db(magnitude)
             # restore stft as
             # stft = magnitude * (np.cos(phase) + 1j*np.sin(phase))
             # stft = amplitude * np.exp(1j * phase)
@@ -123,7 +121,7 @@ class Preprocessor:
 
 if __name__ == "__main__":
     pp = Preprocessor(SR, N_FFT, HOP, SIGNAL_HOP, WINDOW_SAMPLE_LEN)
-    result = pp.preprocess_wav_file("dataset/ney/ney_10.wav")
+    result = pp.preprocess_wav_file("dataset/ney_1/Ney_1_10.wav")
     print(len(result["chunks"]))
     print(result["chunks"][0]["magnitude"].shape)
     print(result["chunks"][0]["phase"].shape)
@@ -131,9 +129,12 @@ if __name__ == "__main__":
     print(result["chunks"][0]["signal"].shape)
 
     ney_wav_files = sorted(
-        [NEY_WAV_DIR + f.name for f in Path(NEY_WAV_DIR).rglob("*.wav")])
+        [data_dir + f.name for data_dir in NEY_WAV_DIRS for f in Path(data_dir).rglob("*.wav")])
+    # print(ney_wav_files, "\n")
+
     gtr_wav_files = sorted(
-        [GTR_WAV_DIR + f.name for f in Path(GTR_WAV_DIR).rglob("*.wav")])
+        [data_dir + f.name for data_dir in GTR_WAV_DIRS for f in Path(data_dir).rglob("*.wav")])
+    # print(gtr_wav_files, "\n")
 
     min_max_ney = pp.save_preprocessed_dataset(ney_wav_files, NEY_FEATURE_DIR)
     min_max_gtr = pp.save_preprocessed_dataset(gtr_wav_files, GTR_FEATURE_DIR)
@@ -141,7 +142,7 @@ if __name__ == "__main__":
         "ney": min_max_ney,
         "gtr": min_max_gtr
     }
+    print(min_max)
 
     with open("dataset/features/min_max.pkl", "wb") as handle:
         pickle.dump(min_max, handle)
-        print(min_max)
