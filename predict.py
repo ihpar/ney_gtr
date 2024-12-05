@@ -97,7 +97,7 @@ def make_wav(magnitudes, phases):
 if __name__ == "__main__":
     import pickle
     from models.model_0 import Model_0
-    from polar_dataset import build_data_loaders
+    from dataset import build_data_loaders
     part = "magnitude"
     with open("dataset/features/min_max.pkl", "rb") as handle:
         min_max = pickle.load(handle)

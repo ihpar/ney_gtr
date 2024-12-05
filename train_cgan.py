@@ -78,7 +78,7 @@ if __name__ == "__main__":
     from models.unet_gen import UNetGenerator
     from models.patch_gan_discriminator import PatchGANDiscriminator
 
-    from polar_dataset import build_data_loaders
+    from dataset import build_data_loaders
 
     with open("dataset/features/min_max.pkl", "rb") as handle:
         min_max = pickle.load(handle)

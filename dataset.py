@@ -7,12 +7,11 @@ from sklearn.model_selection import train_test_split
 
 
 class FeatureDataset(Dataset):
-    def __init__(self, x_dirs, y_dirs, min_max, part, normalize_to="global"):
+    def __init__(self, x_dirs, y_dirs, min_max, part):
         self.x_dirs = x_dirs
         self.y_dirs = y_dirs
         self.min_max = min_max
         self.part = part
-        self.normalize_to = normalize_to
 
         # gtr files
         self.x, self.file_paths_x = self._build_feature_data(
@@ -58,12 +57,8 @@ class FeatureDataset(Dataset):
                 chunk = pickle.load(handle)
 
             data = chunk[part]
-            if self.normalize_to == "global":
-                mini = min_max["min"][part]
-                maxi = min_max["max"][part]
-            elif self.normalize_to == "local":
-                mini = np.min(data)
-                maxi = np.max(data)
+            mini = min_max["min"][part]
+            maxi = min_max["max"][part]
             data = (data - mini) / (maxi - mini)
             features.append(np.expand_dims(data, axis=0))
 
@@ -77,7 +72,7 @@ class FeatureDataset(Dataset):
         return self.x.shape[0]
 
 
-def build_data_loaders(min_max, part=None, test_size=0.2, normalize_to="global"):
+def build_data_loaders(min_max, part=None, test_size=0.2):
     gtr_feature_dirs = sorted(
         [f for f in Path(GTR_FEATURE_DIR).iterdir() if f.is_dir()])
     ney_feature_dirs = sorted(
@@ -92,20 +87,22 @@ def build_data_loaders(min_max, part=None, test_size=0.2, normalize_to="global")
             test_size=test_size,
             random_state=42)
         test_dataset = FeatureDataset(x_test_dirs, y_test_dirs,
-                                      min_max, part, normalize_to=normalize_to)
+                                      min_max, part)
         test_data_loader = DataLoader(dataset=test_dataset,
                                       batch_size=4,
-                                      shuffle=False)
+                                      shuffle=False,
+                                      drop_last=True)
     else:
         x_train_dirs = gtr_feature_dirs
         y_train_dirs = ney_feature_dirs
 
     train_dataset = FeatureDataset(x_train_dirs, y_train_dirs,
-                                   min_max, part, normalize_to=normalize_to)
+                                   min_max, part)
 
     train_data_loader = DataLoader(dataset=train_dataset,
                                    batch_size=4,
-                                   shuffle=True)
+                                   shuffle=True,
+                                   drop_last=True)
 
     return train_data_loader, test_data_loader
 
@@ -116,7 +113,7 @@ if __name__ == "__main__":
 
     train_loader, test_loader = build_data_loaders(min_max,
                                                    part="db",
-                                                   test_size=0.1, normalize_to="local")
+                                                   test_size=0.1)
 
     x, y, _, _ = next(iter(train_loader))
     print(x.size())

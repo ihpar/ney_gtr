@@ -73,7 +73,7 @@ if __name__ == "__main__":
     from models.model_0 import Model_0
     from early_stopper import EarlyStopper
     from magnitude_loss import MagnitudeLoss
-    from polar_dataset import build_data_loaders
+    from dataset import build_data_loaders
 
     with open("dataset/features/min_max.pkl", "rb") as handle:
         min_max = pickle.load(handle)
