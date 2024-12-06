@@ -35,8 +35,8 @@ def predict_polar(model: torch.nn.Module,
         pred = pred * (maxi - mini) + mini
         target = y * (maxi - mini) + mini
         if from_db:
-            pred = np.exp(pred) - 0.02
-            target = np.exp(target) - 0.02
+            pred = librosa.db_to_amplitude(pred)
+            target = librosa.db_to_amplitude(target)
 
         if predictions is None:
             predictions = np.copy(pred)
@@ -48,7 +48,7 @@ def predict_polar(model: torch.nn.Module,
 
         print("-" * 50)
         i += x.size()[0]
-        if i == limit:
+        if i >= limit:
             break
 
     return predictions, targets
@@ -78,7 +78,7 @@ def get_phases(data_loader,
 
         print("-" * 50)
         i += x.size()[0]
-        if i == limit:
+        if i >= limit:
             break
     return phases
 
@@ -101,6 +101,7 @@ if __name__ == "__main__":
     part = "magnitude"
     with open("dataset/features/min_max.pkl", "rb") as handle:
         min_max = pickle.load(handle)
+        print(min_max)
 
     _, test_data_loader = build_data_loaders(
         min_max, part=part, test_size=0.1)

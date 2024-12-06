@@ -71,7 +71,7 @@ class Model_1(nn.Module):
 
 if __name__ == "__main__":
     model = Model_1(1, 1, base_features=64)
-    x = torch.randn(4, 1, 256, 256)
+    x = torch.randn(8, 1, 512, 512)
     output = model(x)
 
     print("Input shape:", x.shape)

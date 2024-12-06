@@ -89,7 +89,7 @@ def build_data_loaders(min_max, part=None, test_size=0.2):
         test_dataset = FeatureDataset(x_test_dirs, y_test_dirs,
                                       min_max, part)
         test_data_loader = DataLoader(dataset=test_dataset,
-                                      batch_size=4,
+                                      batch_size=8,
                                       shuffle=False,
                                       drop_last=True)
     else:
@@ -100,7 +100,7 @@ def build_data_loaders(min_max, part=None, test_size=0.2):
                                    min_max, part)
 
     train_data_loader = DataLoader(dataset=train_dataset,
-                                   batch_size=4,
+                                   batch_size=8,
                                    shuffle=True,
                                    drop_last=True)
 
@@ -108,6 +108,7 @@ def build_data_loaders(min_max, part=None, test_size=0.2):
 
 
 if __name__ == "__main__":
+    from plotter import plot_heatmaps
     with open("dataset/features/min_max.pkl", "rb") as handle:
         min_max = pickle.load(handle)
 
@@ -119,10 +120,5 @@ if __name__ == "__main__":
     print(x.size())
     print(y.size())
 
-    import seaborn as sns
-    import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.heatmap(y[0].numpy().squeeze(axis=0))
-    ax.invert_yaxis()
-    plt.tight_layout()
-    plt.show()
+    plot_heatmaps(x[0].numpy().squeeze(axis=0),
+                  y[0].numpy().squeeze(axis=0))
