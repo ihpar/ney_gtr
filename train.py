@@ -39,9 +39,6 @@ def train_model(model: nn.Module,
         num_val_batches = 0
         with torch.no_grad():
             for gtr_features, ney_features, _, _ in test_data_loader:
-                if len(gtr_features) != 4:
-                    continue
-
                 gtr_features = gtr_features.to(device)
                 ney_features = ney_features.to(device)
 
