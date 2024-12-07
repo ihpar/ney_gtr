@@ -75,8 +75,14 @@ class FeatureDataset(Dataset):
 def build_data_loaders(min_max, part=None, test_size=0.2):
     gtr_feature_dirs = sorted(
         [f for f in Path(GTR_FEATURE_DIR).iterdir() if f.is_dir()])
+
+    gtr_feature_dirs = gtr_feature_dirs + gtr_feature_dirs
+
     ney_feature_dirs = sorted(
         [f for f in Path(NEY_FEATURE_DIR).iterdir() if f.is_dir()])
+
+    ney_feature_dirs = ney_feature_dirs + \
+        ney_feature_dirs[30:] + ney_feature_dirs[:30]
 
     test_dataset, test_data_loader = None, None
 
