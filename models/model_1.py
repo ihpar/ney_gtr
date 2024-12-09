@@ -4,32 +4,32 @@ import torch.nn.functional as F
 
 
 class Model_1(nn.Module):
-    def __init__(self, in_channels=1, out_channels=1, base_features=64):
+    def __init__(self, in_channels=1, out_channels=1, features=64):
         super().__init__()
         # Encoder
-        self.encoder1 = self._block(in_channels, base_features)
-        self.encoder2 = self._block(base_features, base_features * 2)
-        self.encoder3 = self._block(base_features * 2, base_features * 4)
-        self.encoder4 = self._block(base_features * 4, base_features * 8)
+        self.encoder1 = self._block(in_channels, features)
+        self.encoder2 = self._block(features, features * 2)
+        self.encoder3 = self._block(features * 2, features * 4)
+        self.encoder4 = self._block(features * 4, features * 8)
 
         # Bottleneck
-        self.bottleneck = self._block(base_features * 8, base_features * 16)
+        self.bottleneck = self._block(features * 8, features * 16)
 
         # Decoder
-        self.up4 = self._upsample(base_features * 16, base_features * 8)
-        self.decoder4 = self._block(base_features * 16, base_features * 8)
+        self.up4 = self._upsample(features * 16, features * 8)
+        self.decoder4 = self._block(features * 16, features * 8)
 
-        self.up3 = self._upsample(base_features * 8, base_features * 4)
-        self.decoder3 = self._block(base_features * 8, base_features * 4)
+        self.up3 = self._upsample(features * 8, features * 4)
+        self.decoder3 = self._block(features * 8, features * 4)
 
-        self.up2 = self._upsample(base_features * 4, base_features * 2)
-        self.decoder2 = self._block(base_features * 4, base_features * 2)
+        self.up2 = self._upsample(features * 4, features * 2)
+        self.decoder2 = self._block(features * 4, features * 2)
 
-        self.up1 = self._upsample(base_features * 2, base_features)
-        self.decoder1 = self._block(base_features * 2, base_features)
+        self.up1 = self._upsample(features * 2, features)
+        self.decoder1 = self._block(features * 2, features)
 
         # Final output layer
-        self.final_conv = nn.Conv2d(base_features, out_channels, kernel_size=1)
+        self.final_conv = nn.Conv2d(features, out_channels, kernel_size=1)
         self.activation = nn.Sigmoid()
 
     def forward(self, x):
@@ -70,7 +70,7 @@ class Model_1(nn.Module):
 
 
 if __name__ == "__main__":
-    model = Model_1(1, 1, base_features=64)
+    model = Model_1(1, 1, features=64)
     x = torch.randn(8, 1, 512, 512)
     output = model(x)
 
