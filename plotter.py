@@ -18,6 +18,20 @@ def plot_loss(history, title, start=0):
     plt.show()
 
 
+def plot_gan_loss(history, title, start=0):
+    plt.figure(figsize=(8, 4))
+    plt.title(title)
+    gen_loss = history["gen"]
+    disc_loss = history["disc"]
+    epochs = np.arange(1 + start, len(gen_loss) + 1)
+    plt.plot(epochs, gen_loss[start:], label="Generator")
+    plt.plot(epochs, disc_loss[start:], label="Discriminator")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.show()
+
+
 def plot_heatmaps(prediction, target):
     sns.set_theme(rc={"figure.figsize": (14, 5)})
     _, (ax1, ax2) = plt.subplots(1, 2)
