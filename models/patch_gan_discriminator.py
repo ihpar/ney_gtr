@@ -27,6 +27,6 @@ class PatchGANDiscriminator(nn.Module):
 
 
 if __name__ == "__main__":
-    x = torch.randn(4, 2, 128, 128)
+    x = torch.randn(8, 2, 512, 512)
     y = PatchGANDiscriminator(2, 32)(x)
     print(y.size())

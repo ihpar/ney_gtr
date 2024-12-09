@@ -51,19 +51,12 @@ class UNetGenerator(nn.Module):
         encodings = encodings[:-1][::-1]
         for i, layer in enumerate(self.decoder):
             x = layer(x)
-
-            if x.size(2) != encodings[i].size(2) or x.size(3) != encodings[i].size(3):
-                encodings[i] = torch.nn.functional.interpolate(
-                    encodings[i],
-                    size=(x.size(2), x.size(3)),
-                    mode="nearest")
-
             x = torch.cat([x, encodings[i]], dim=1)
 
         return self.act(self.final_layer(x))
 
 
 if __name__ == "__main__":
-    x = torch.randn(4, 1, 128, 128)
+    x = torch.randn(8, 1, 512, 512)
     y = UNetGenerator(1, 1, 32)(x)
     print(y.size())
