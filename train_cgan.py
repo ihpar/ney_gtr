@@ -14,9 +14,16 @@ def train_cgan(device,
     fake_label = 0.0
     generator.train()
     discriminator.train()
+    history = {
+        "gen": [],
+        "disc": []
+    }
 
     for epoch in range(epochs):
-        for batch_idx, (X, Y, _, _) in enumerate(dataloader):
+        running_gen = 0.0
+        running_disc = 0.0
+        num_batches = 0
+        for X, Y, _, _ in dataloader:
             X, Y = X.to(device), Y.to(device)
 
             # -------------------
@@ -61,12 +68,19 @@ def train_cgan(device,
             g_loss.backward()
             optimizer_G.step()
 
-            if batch_idx % 50 == 0:
-                print(f"Epoch [{epoch}/{epochs}] Batch {batch_idx}/{len(dataloader)} "
-                      f"Loss D: {d_loss.item():.4f}, Loss G: {g_loss.item():.4f}")
+            running_gen += g_loss.item()
+            running_disc += d_loss.item()
+            num_batches += 1
 
-        print("-" * 50)
+        running_gen /= num_batches
+        running_disc /= num_batches
+        history["gen"].append(running_gen)
+        history["disc"].append(running_disc)
+        print(
+            f"E: {epoch + 1:03d}/{epochs}\t D: {running_disc:.6f}\t G: {running_gen:.6f}")
+
     print("Training Complete!")
+    return generator, history
 
 
 if __name__ == "__main__":
