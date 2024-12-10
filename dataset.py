@@ -96,7 +96,7 @@ def build_data_loaders(min_max, part=None, test_size=0.2):
                                       min_max, part)
         test_data_loader = DataLoader(dataset=test_dataset,
                                       batch_size=8,
-                                      shuffle=False,
+                                      shuffle=True,
                                       drop_last=True)
     else:
         x_train_dirs = gtr_feature_dirs
