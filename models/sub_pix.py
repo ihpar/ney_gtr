@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class SubpixelUpsample(nn.Module):
@@ -53,12 +54,12 @@ class UNetWithSubpixel(nn.Module):
     def forward(self, x):
         # Encoder
         enc1 = self.enc1(x)
-        enc2 = self.enc2(nn.MaxPool2d(2)(enc1))
-        enc3 = self.enc3(nn.MaxPool2d(2)(enc2))
-        enc4 = self.enc4(nn.MaxPool2d(2)(enc3))
+        enc2 = self.enc2(F.max_pool2d(enc1, 2))
+        enc3 = self.enc3(F.max_pool2d(enc2, 2))
+        enc4 = self.enc4(F.max_pool2d(enc3, 2))
 
         # Bottleneck
-        bottleneck = self.bottleneck(nn.MaxPool2d(2)(enc4))
+        bottleneck = self.bottleneck(F.max_pool2d(enc4, 2))
 
         # Decoder
         dec4 = self.upconv4(bottleneck)
