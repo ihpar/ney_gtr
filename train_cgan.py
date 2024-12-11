@@ -72,7 +72,8 @@ def train_cgan(device,
             running_disc += d_loss.item()
             num_batches += 1
             if num_batches % 100 == 0:
-                print(f" - B: {num_batches}\t D: {d_loss.item():.6f}\t G: {g_loss.item():.6f}")
+                print(f" - B: {num_batches}\t D: {d_loss.item():.6f}\t G: {
+                      g_loss.item():.6f}\t Gadv: {g_adv_loss.item():.6f}")
 
         running_gen /= num_batches
         running_disc /= num_batches
