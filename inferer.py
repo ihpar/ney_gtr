@@ -4,12 +4,12 @@ import librosa
 import numpy as np
 import soundfile as sf
 from constants import *
+import numpy.typing as npt
 from disk_utils import load_model
 
 
 class Inferer:
-    def __init__(self, model, device, mini, maxi, len_window, len_overlap, n_fft, hop):
-        self.model = model
+    def __init__(self, device, mini, maxi, len_window, len_overlap, n_fft, hop):
         self.device = device
         self.mini = mini
         self.maxi = maxi
@@ -19,7 +19,7 @@ class Inferer:
         self.hop = hop
         self.start_offset = len_window - len_overlap
 
-    def _get_X(self, signal):
+    def _get_X(self, signal: npt.NDArray):
         i = 0
         dbs = []
         phases = []
@@ -37,7 +37,7 @@ class Inferer:
             phase = np.angle(stft)
             phases.append(phase)
             db = librosa.amplitude_to_db(magnitude)
-            # denormalization
+            # normalization
             db = (db - self.mini) / (self.maxi - self.mini)
             db = np.expand_dims(db, axis=0)
             dbs.append(db)
@@ -49,20 +49,20 @@ class Inferer:
         dbs = torch.from_numpy(np.array(dbs, dtype=np.float32))
         return dbs, phases
 
-    def _get_predictions(self, dbs, verbose):
+    def _get_predictions(self, model, dbs, verbose=False, as_db=False):
         if verbose:
             print("Getting predictions...")
 
         predictions = []
         num_dbs = dbs.size()[0]
         with torch.no_grad():
-            self.model.to(self.device)
             for i in range(num_dbs):
                 y = dbs[i:i+1].to(self.device)
-                y_hat = (self.model(y)).to(torch.device("cpu"))
+                y_hat = (model(y)).to(torch.device("cpu"))
                 y_hat = y_hat[0].numpy().squeeze(axis=0)
-                y_hat = y_hat * (self.maxi - self.mini) + self.mini
-                y_hat = librosa.db_to_amplitude(y_hat)
+                if not as_db:
+                    y_hat = y_hat * (self.maxi - self.mini) + self.mini
+                    y_hat = librosa.db_to_amplitude(y_hat)
                 predictions.append(y_hat)
                 if verbose:
                     print(f"  predicted {i+1}/{num_dbs}")
@@ -112,16 +112,29 @@ class Inferer:
             print("Stitching complete!")
         return stitched_wave
 
-    def infer(self, signal, use_gl=False, verbose=True):
+    def infer(self, model: torch.nn.Module, signal, use_gl=False, verbose=True):
         signal /= np.max(np.abs(signal))
         X, phases = self._get_X(signal)
-        predictions = self._get_predictions(X, verbose)
+        predictions = self._get_predictions(model, X, verbose)
         if use_gl:
             inverses = self._inverse_preds(predictions, verbose)
         else:
             inverses = self._inverse_preds(predictions, verbose, phases)
 
         return self._stitch(inverses, verbose)
+
+    def get_magnitudes(self, model: torch.nn.Module,
+                       signal_gtr: npt.NDArray,
+                       signal_ney: npt.NDArray):
+
+        signal_gtr /= np.max(np.abs(signal_gtr))
+        signal_ney /= np.max(np.abs(signal_ney))
+        X_gtr, _ = self._get_X(signal_gtr)
+        predictions = self._get_predictions(
+            model, X_gtr, verbose=False, as_db=True)
+
+        X_ney, _ = self._get_X(signal_ney)
+        return np.array(predictions), X_ney.squeeze(axis=1)
 
 
 if __name__ == "__main__":
@@ -134,11 +147,11 @@ if __name__ == "__main__":
     maxi = min_max[inst]["max"][feature]
     signal, _ = librosa.load("dataset/tests/test_0.wav", mono=True, sr=SR)
 
-    model = load_model("model_lg")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = load_model("model_lg").to(device)
 
-    inferer = Inferer(model, device, mini, maxi,
-                      WINDOW_SAMPLE_LEN, OVERLAP, N_FFT, HOP)
-    result = inferer.infer(signal, use_gl=False)
+    inferer = Inferer(device, mini, maxi, WINDOW_SAMPLE_LEN,
+                      OVERLAP, N_FFT, HOP)
+    result = inferer.infer(model, signal, use_gl=False)
 
     sf.write("katip_3.wav", result, SR, format="wav")

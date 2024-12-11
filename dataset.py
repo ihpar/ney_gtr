@@ -72,7 +72,7 @@ class FeatureDataset(Dataset):
         return self.x.shape[0]
 
 
-def build_data_loaders(min_max, part=None, test_size=0.2):
+def build_data_loaders(min_max, part=None, test_size=0.2, test_only=False):
     gtr_feature_dirs = sorted(
         [f for f in Path(GTR_FEATURE_DIR).iterdir() if f.is_dir()])
 
@@ -84,6 +84,7 @@ def build_data_loaders(min_max, part=None, test_size=0.2):
     ney_feature_dirs = ney_feature_dirs + \
         ney_feature_dirs[30:] + ney_feature_dirs[:30]
 
+    train_dataset, train_data_loader = None, None
     test_dataset, test_data_loader = None, None
 
     if test_size > 0:
@@ -102,13 +103,14 @@ def build_data_loaders(min_max, part=None, test_size=0.2):
         x_train_dirs = gtr_feature_dirs
         y_train_dirs = ney_feature_dirs
 
-    train_dataset = FeatureDataset(x_train_dirs, y_train_dirs,
-                                   min_max, part)
+    if not test_only:
+        train_dataset = FeatureDataset(x_train_dirs, y_train_dirs,
+                                       min_max, part)
 
-    train_data_loader = DataLoader(dataset=train_dataset,
-                                   batch_size=8,
-                                   shuffle=True,
-                                   drop_last=True)
+        train_data_loader = DataLoader(dataset=train_dataset,
+                                       batch_size=8,
+                                       shuffle=True,
+                                       drop_last=True)
 
     return train_data_loader, test_data_loader
 

@@ -32,9 +32,11 @@ def plot_gan_loss(history, title, start=0):
     plt.show()
 
 
-def plot_heatmaps(prediction, target, from_db=False):
+def plot_heatmaps(prediction, target, from_db=False, title=None):
     sns.set_theme(rc={"figure.figsize": (14, 5)})
-    _, (ax1, ax2) = plt.subplots(1, 2)
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    if title is not None:
+        fig.suptitle(title)
     if from_db:
         prediction = librosa.amplitude_to_db(prediction)
         target = librosa.amplitude_to_db(target)
