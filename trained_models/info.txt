@@ -5,3 +5,5 @@ model_subpix_32: UNetWithSubpixel(features=32), E: 015/250 T: 20.187906 V: 26.69
 generator_sp_32: UNetWithSubpixel(features=32), GAN, E: 050/50 D: 0.426078 G: 23.227864
 generator_sp_32_0_5: UNetWithSubpixel(features=32), betas=(0.5, 0.999), lambda_l1 = 0.5
     GAN, E: 050/50 D: 0.426078 G: 23.227864
+generator_sp_32_0_8_full: UNetWithSubpixel(features=32), lambda_l1 = 0.8, whole dataset,
+    GAN, E: 050/50 D: 0.386604 G: 20.398434
