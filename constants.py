@@ -3,6 +3,10 @@ GTR_WAV_DIRS = ["dataset/gtr_1/", "dataset/gtr_2/"]
 NEY_FEATURE_DIR = "dataset/features/ney/"
 GTR_FEATURE_DIR = "dataset/features/gtr/"
 
+# for step 2: signal -> signal
+GTR_AUDIO_FEATURES_DIR = "dataset/audio_features/gtr/"
+NEY_AUDIO_FEATURES_DIR = "dataset/audio_features/ney/"
+
 SR = 48000
 N_FFT = 511 * 2
 HOP = 64
