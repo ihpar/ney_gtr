@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class ResidualBlock(nn.Module):
     def __init__(self, channels):
-        super(ResidualBlock, self).__init__()
+        super().__init__()
         self.block = nn.Sequential(
             nn.Conv1d(channels, channels, kernel_size=3,
                       stride=1, padding=1, dilation=1),
@@ -20,9 +20,9 @@ class ResidualBlock(nn.Module):
         return x + self.block(x)
 
 
-class Generator(nn.Module):
+class Generator_HiFi_Dil(nn.Module):
     def __init__(self):
-        super(Generator, self).__init__()
+        super().__init__()
         self.net = nn.Sequential(
             nn.Conv1d(1, 64, kernel_size=15, stride=1, padding=7),
             nn.LeakyReLU(0.2),
@@ -49,9 +49,9 @@ class Generator(nn.Module):
         return self.net(x)
 
 
-class Discriminator(nn.Module):
+class Discriminator_HiFi_Dil(nn.Module):
     def __init__(self):
-        super(Discriminator, self).__init__()
+        super().__init__()
         self.net = nn.Sequential(
             nn.Conv1d(1, 64, kernel_size=15, stride=1, padding=7),
             nn.LeakyReLU(0.2),
@@ -78,11 +78,11 @@ if __name__ == "__main__":
     # Define adversarial loss
     adversarial_criterion = nn.BCEWithLogitsLoss()
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Instantiate models and move them to the device
-    generator = Generator().to(device)
-    discriminator = Discriminator().to(device)
+    generator = Generator_HiFi_Dil().to(device)
+    discriminator = Discriminator_HiFi_Dil().to(device)
 
     optimizer_g = torch.optim.Adam(generator.parameters(), lr=1e-4)
     optimizer_d = torch.optim.Adam(discriminator.parameters(), lr=1e-4)
@@ -114,5 +114,5 @@ if __name__ == "__main__":
         g_loss.backward()
         optimizer_g.step()
 
-        print(f'Epoch [{epoch}], D Loss: {
-              d_loss.item()}, G Loss: {g_loss.item()}')
+        print(f"Epoch [{epoch}], D Loss: {
+              d_loss.item()}, G Loss: {g_loss.item()}")
