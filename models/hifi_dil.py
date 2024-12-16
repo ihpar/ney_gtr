@@ -115,5 +115,4 @@ if __name__ == "__main__":
         g_loss.backward()
         optimizer_g.step()
 
-        print(f"Epoch [{epoch}], D Loss: {
-              d_loss.item()}, G Loss: {g_loss.item()}")
+        print(f"Epoch [{epoch}], D Loss: {d_loss.item()}, G Loss: {g_loss.item()}")
