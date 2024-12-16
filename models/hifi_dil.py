@@ -10,7 +10,7 @@ class ResidualBlock(nn.Module):
             nn.Conv1d(channels, channels, kernel_size=3,
                       stride=1, padding=1, dilation=1),
             nn.BatchNorm1d(channels),
-            nn.ReLU(inplace=True),
+            nn.Tanh(),
             nn.Conv1d(channels, channels, kernel_size=2,
                       stride=1, padding=1, dilation=2),
             nn.BatchNorm1d(channels)
@@ -25,7 +25,7 @@ class Generator_HiFi_Dil(nn.Module):
         super().__init__()
         self.net = nn.Sequential(
             nn.Conv1d(1, 64, kernel_size=15, stride=1, padding=7),
-            nn.LeakyReLU(0.2),
+            nn.Tanh(),
 
             # Adding Multi-Scale Residual Blocks
             ResidualBlock(64),
@@ -35,11 +35,11 @@ class Generator_HiFi_Dil(nn.Module):
             # Dilated Convolutions for Long-Range Dependencies
             nn.Conv1d(64, 128, kernel_size=3, stride=1, padding=1, dilation=2),
             nn.BatchNorm1d(128),
-            nn.ReLU(inplace=True),
+            nn.Tanh(),
 
             nn.Conv1d(128, 64, kernel_size=3, stride=1, padding=1, dilation=2),
             nn.BatchNorm1d(64),
-            nn.ReLU(inplace=True),
+            nn.Tanh(),
 
             # Final layer to project back to 1-channel audio
             nn.Conv1d(64, 1, kernel_size=11, stride=1, padding=7)
@@ -67,7 +67,8 @@ class Discriminator_HiFi_Dil(nn.Module):
             nn.LeakyReLU(0.2),
 
             # Final convolutional layer to project to a single scalar
-            nn.Conv1d(256, 1, kernel_size=3, stride=1, padding=1)
+            nn.Conv1d(256, 1, kernel_size=3, stride=1, padding=1),
+            nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -114,4 +115,5 @@ if __name__ == "__main__":
         g_loss.backward()
         optimizer_g.step()
 
-        print(f"Epoch [{epoch}], D Loss: {d_loss.item()}, G Loss: {g_loss.item()}")
+        print(f"Epoch [{epoch}], D Loss: {
+              d_loss.item()}, G Loss: {g_loss.item()}")
