@@ -51,7 +51,7 @@ class Inferer:
 
     def _get_predictions(self, model, dbs, verbose=False, as_db=False):
         if verbose:
-            print("Getting predictions...")
+            print("Getting magnitude predictions...")
 
         predictions = []
         num_dbs = dbs.size()[0]
@@ -65,7 +65,7 @@ class Inferer:
                     y_hat = librosa.db_to_amplitude(y_hat)
                 predictions.append(y_hat)
                 if verbose:
-                    print(f"  predicted {i+1}/{num_dbs}")
+                    print(f"  magnitude {i+1}/{num_dbs}")
         return predictions
 
     def _inverse_preds(self, predictions, verbose, phases=None):
@@ -82,8 +82,6 @@ class Inferer:
                 inverse = librosa.istft(prediction * np.exp(1j * phases[i]),
                                         n_fft=N_FFT, hop_length=HOP)
             inverses.append(inverse)
-            if verbose:
-                print(f"  inverted {i+1}/{len(predictions)}")
         return inverses
 
     def _stitch(self, inverses, verbose):
@@ -108,9 +106,24 @@ class Inferer:
             stitched_wave[-self.len_overlap:] *= fade_out
 
         stitched_wave /= (np.max(np.abs(stitched_wave)) + 0.001)
-        if verbose:
-            print("Stitching complete!")
         return stitched_wave
+
+    def _predict_hifi(self, model, signals, verbose=True):
+        if verbose:
+            print("Getting signal predictions...")
+        predictions = []
+        with torch.no_grad():
+            for i, signal in enumerate(signals):
+                x = np.array([np.expand_dims(signal, axis=0)],
+                             dtype=np.float32)
+                x = (torch.from_numpy(x)).to(self.device)
+                y = model(x)
+                y = y.to(torch.device("cpu"))
+                y = (y.numpy()[0]).squeeze(axis=0)
+                predictions.append(y)
+                if verbose:
+                    print(f"  hifi {i+1}/{len(signals)}")
+        return predictions
 
     def infer(self, model: torch.nn.Module, signal, use_gl=False, verbose=True):
         signal /= np.max(np.abs(signal))
@@ -122,6 +135,14 @@ class Inferer:
             inverses = self._inverse_preds(predictions, verbose, phases)
 
         return self._stitch(inverses, verbose)
+
+    def infer_hifi(self, model_magnitude, model_hifi, src_signal, verbose=True):
+        src_signal /= np.max(np.abs(src_signal))
+        X, phases = self._get_X(src_signal)
+        predictions = self._get_predictions(model_magnitude, X, verbose)
+        inverses = self._inverse_preds(predictions, verbose, phases)
+        inverses_hifi = self._predict_hifi(model_hifi, inverses, verbose)
+        return self._stitch(inverses_hifi, verbose)
 
     def get_magnitudes(self, model: torch.nn.Module,
                        signal_gtr: npt.NDArray,
@@ -148,10 +169,11 @@ if __name__ == "__main__":
     signal, _ = librosa.load("dataset/tests/test_0.wav", mono=True, sr=SR)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = load_model("model_lg").to(device)
+    model_magnitude = load_model("generator_sp_32_0_8_full").to(device)
+    model_hifi = load_model("hifi_gen").to(device)
 
     inferer = Inferer(device, mini, maxi, WINDOW_SAMPLE_LEN,
                       OVERLAP, N_FFT, HOP)
-    result = inferer.infer(model, signal, use_gl=False)
+    result = inferer.infer_hifi(model_magnitude, model_hifi, signal)
 
-    sf.write("katip_3.wav", result, SR, format="wav")
+    # sf.write("katip_3.wav", result, SR, format="wav")
